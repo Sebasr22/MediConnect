@@ -21,18 +21,17 @@ class PatientModel extends UserModel {
 
   factory PatientModel.fromJson(Map<String, dynamic> json) {
     try {
-      
       // Handle potentially large IDs
       final id = json['id'] is String 
           ? int.parse(json['id']) 
           : (json['id'] as num).toInt();
       
-      final name = json['name'] as String;
-      final email = json['email'] as String;
-      final phone = json['phone'] as String;
-      final birthdate = json['birthdate'] as String;
+      // Manejo seguro de campos requeridos con valores por defecto
+      final name = json['name'] as String? ?? 'Sin nombre';
+      final email = json['email'] as String? ?? 'Sin email';
+      final phone = json['phone'] as String? ?? 'Sin teléfono';
+      final birthdate = json['birthdate'] as String? ?? '2000-01-01';
       final password = json['password'] as String?;
-      
       
       return PatientModel(
         id: id,
@@ -43,7 +42,18 @@ class PatientModel extends UserModel {
         password: password,
       );
     } catch (e) {
-      rethrow;
+      // Si falla el parsing, crear un paciente con datos mínimos válidos
+      final id = json['id'] is String 
+          ? int.tryParse(json['id']) ?? 0
+          : (json['id'] as num?)?.toInt() ?? 0;
+          
+      return PatientModel(
+        id: id,
+        name: 'Datos incompletos',
+        email: 'Sin email',
+        phone: 'Sin teléfono',
+        birthdateString: '2000-01-01',
+      );
     }
   }
   
@@ -61,7 +71,14 @@ class PatientModel extends UserModel {
         birthdate: DateTime.parse(birthdateString),
       );
     } catch (e) {
-      rethrow;
+      // Si falla el parsing de fecha, usar fecha por defecto
+      return Patient(
+        id: id,
+        name: name,
+        email: email,
+        phone: phone,
+        birthdate: DateTime(2000, 1, 1),
+      );
     }
   }
 

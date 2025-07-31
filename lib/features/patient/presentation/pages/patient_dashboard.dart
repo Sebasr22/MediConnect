@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -20,21 +21,88 @@ class PatientDashboard extends StatefulWidget {
   State<PatientDashboard> createState() => _PatientDashboardState();
 }
 
-class _PatientDashboardState extends State<PatientDashboard> {
+class _PatientDashboardState extends State<PatientDashboard> with WidgetsBindingObserver {
   final _searchController = TextEditingController();
+  Timer? _searchTimer;
+  PatientBloc? _patientBloc;
+  bool _hasLoadedData = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Registrar el observer para escuchar cambios de lifecycle
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
   void dispose() {
+    // Remover el observer
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
+    _searchTimer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    print('🔄 App lifecycle cambió a: $state'); // Debug log
+    
+    if (state == AppLifecycleState.resumed && _hasLoadedData) {
+      // Cuando la app vuelve a ser visible, recargar datos si ya habíamos cargado antes
+      print('🔄 App resumed - recargando doctores'); // Debug log
+      _reloadDoctors();
+    }
+  }
+
+  void _reloadDoctors() {
+    if (_patientBloc != null && mounted) {
+      print('🔄 Recargando lista de doctores...'); // Debug log
+      _patientBloc!.add(GetDoctorsRequested());
+    }
+  }
+
+  void _onSearchChanged(String query) {
+    // Cancelar el timer anterior si existe
+    _searchTimer?.cancel();
+    
+    // Crear un nuevo timer con delay de 300ms
+    _searchTimer = Timer(const Duration(milliseconds: 300), () {
+      print('🔍 Ejecutando búsqueda para: "$query"'); // Debug log
+      if (mounted && _patientBloc != null) {
+        _patientBloc!.add(SearchDoctorsRequested(query));
+      }
+    });
+  }
+
+  void _onSearchPressed() {
+    // Búsqueda inmediata al presionar el botón
+    _searchTimer?.cancel();
+    final query = _searchController.text;
+    print('🔍 Búsqueda inmediata con botón: "$query"'); // Debug log
+    if (_patientBloc != null) {
+      _patientBloc!.add(SearchDoctorsRequested(query));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<PatientBloc>()..add(GetDoctorsRequested()),
-      child: Scaffold(
-        body: Container(
+      create: (context) {
+        _patientBloc = getIt<PatientBloc>()..add(GetDoctorsRequested());
+        return _patientBloc!;
+      },
+      child: BlocListener<PatientBloc, PatientState>(
+        listener: (context, state) {
+          if (state is DoctorsLoaded) {
+            _hasLoadedData = true;
+            print('✅ Datos cargados exitosamente - hasLoadedData = true'); // Debug log
+          } else if (state is PatientError) {
+            print('❌ Error detectado: ${state.message}'); // Debug log
+          }
+        },
+        child: Scaffold(
+          body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -128,9 +196,8 @@ class _PatientDashboardState extends State<PatientDashboard> {
                       // Search Bar
                       SearchBarWidget(
                         controller: _searchController,
-                        onChanged: (query) {
-                          context.read<PatientBloc>().add(SearchDoctorsRequested(query));
-                        },
+                        onChanged: _onSearchChanged,
+                        onSearchPressed: _onSearchPressed,
                       ),
                     ],
                   ),
@@ -148,38 +215,69 @@ class _PatientDashboardState extends State<PatientDashboard> {
 
                       if (state is PatientError) {
                         return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 64,
-                                color: Colors.red.shade400,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Error',
-                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red.shade800,
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.wifi_off,
+                                  size: 80,
+                                  color: Colors.orange.shade400,
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                state.message,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.grey.shade600,
+                                const SizedBox(height: 24),
+                                Text(
+                                  'Conexión Perdida',
+                                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.orange.shade800,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  context.read<PatientBloc>().add(GetDoctorsRequested());
-                                },
-                                child: const Text('Reintentar'),
-                              ),
-                            ],
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Parece que hubo un problema al cargar los doctores.',
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  state.message,
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey.shade500,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                                const SizedBox(height: 32),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 48,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      print('🔄 Usuario presionó recargar manualmente'); // Debug log
+                                      _reloadDoctors();
+                                    },
+                                    icon: const Icon(Icons.refresh),
+                                    label: const Text(
+                                      'Recargar Doctores',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue.shade600,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       }
@@ -223,6 +321,7 @@ class _PatientDashboardState extends State<PatientDashboard> {
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),

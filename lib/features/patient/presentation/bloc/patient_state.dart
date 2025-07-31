@@ -35,7 +35,14 @@ class DoctorsLoaded extends PatientState {
 
   // Helper methods
   List<String> get specialties {
-    return doctors.map((doctor) => doctor.specialty).toSet().toList()..sort();
+    return doctors
+        .map((doctor) => doctor.specialty)
+        .where((specialty) => 
+            specialty != 'Sin especialidad' && 
+            specialty.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
   }
 
   bool get hasResults => filteredDoctors.isNotEmpty;

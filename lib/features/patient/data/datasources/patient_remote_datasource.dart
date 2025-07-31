@@ -25,12 +25,20 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
             .map((doctorJson) => DoctorModel.fromJson(doctorJson))
             .toList();
       } else {
-        throw const ServerException('Error al obtener doctores');
+        throw ServerException('Error al obtener doctores - Código: ${response.statusCode}');
       }
-    } on DioException catch (_) {
-      throw const ServerException('Error del servidor');
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout) {
+        throw const ServerException('Tiempo de conexión agotado');
+      } else if (e.type == DioExceptionType.receiveTimeout) {
+        throw const ServerException('Tiempo de respuesta agotado');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw const ServerException('Error de conexión a internet');
+      } else {
+        throw ServerException('Error del servidor: ${e.message}');
+      }
     } catch (e) {
-      throw const ServerException('Error inesperado');
+      throw ServerException('Error inesperado al procesar doctores: $e');
     }
   }
 

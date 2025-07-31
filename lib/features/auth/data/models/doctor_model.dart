@@ -34,11 +34,16 @@ class DoctorModel extends UserModel {
     // Manejo seguro de specialty con valor por defecto
     final specialty = json['specialty'] as String? ?? 'Sin especialidad';
     
+    // Manejo seguro de campos requeridos con valores por defecto
+    final name = json['name'] as String? ?? 'Sin nombre';
+    final email = json['email'] as String? ?? 'Sin email';
+    final phone = json['phone'] as String? ?? 'Sin teléfono';
+    
     return DoctorModel(
       id: id,
-      name: json['name'] as String,
-      email: json['email'] as String,
-      phone: json['phone'] as String,
+      name: name,
+      email: email,
+      phone: phone,
       specialty: specialty,
       rating: rating,
       password: json['password'] as String?,

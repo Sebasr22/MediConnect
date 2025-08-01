@@ -46,18 +46,15 @@ class _PatientDashboardState extends State<PatientDashboard> with WidgetsBinding
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    print('🔄 App lifecycle cambió a: $state'); // Debug log
     
     if (state == AppLifecycleState.resumed && _hasLoadedData) {
       // Cuando la app vuelve a ser visible, recargar datos si ya habíamos cargado antes
-      print('🔄 App resumed - recargando doctores'); // Debug log
       _reloadDoctors();
     }
   }
 
   void _reloadDoctors() {
     if (_patientBloc != null && mounted) {
-      print('🔄 Recargando lista de doctores...'); // Debug log
       _patientBloc!.add(GetDoctorsRequested());
     }
   }
@@ -68,7 +65,6 @@ class _PatientDashboardState extends State<PatientDashboard> with WidgetsBinding
     
     // Crear un nuevo timer con delay de 300ms
     _searchTimer = Timer(const Duration(milliseconds: 300), () {
-      print('🔍 Ejecutando búsqueda para: "$query"'); // Debug log
       if (mounted && _patientBloc != null) {
         _patientBloc!.add(SearchDoctorsRequested(query));
       }
@@ -79,7 +75,6 @@ class _PatientDashboardState extends State<PatientDashboard> with WidgetsBinding
     // Búsqueda inmediata al presionar el botón
     _searchTimer?.cancel();
     final query = _searchController.text;
-    print('🔍 Búsqueda inmediata con botón: "$query"'); // Debug log
     if (_patientBloc != null) {
       _patientBloc!.add(SearchDoctorsRequested(query));
     }
@@ -96,9 +91,6 @@ class _PatientDashboardState extends State<PatientDashboard> with WidgetsBinding
         listener: (context, state) {
           if (state is DoctorsLoaded) {
             _hasLoadedData = true;
-            print('✅ Datos cargados exitosamente - hasLoadedData = true'); // Debug log
-          } else if (state is PatientError) {
-            print('❌ Error detectado: ${state.message}'); // Debug log
           }
         },
         child: Scaffold(
@@ -118,14 +110,22 @@ class _PatientDashboardState extends State<PatientDashboard> with WidgetsBinding
               children: [
                 // Header
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white,
+                        Colors.blue.shade50.withValues(alpha: 0.3),
+                      ],
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blue.shade100,
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
+                        color: Colors.blue.shade100.withValues(alpha: 0.5),
+                        blurRadius: 20,
+                        offset: const Offset(0, 4),
+                        spreadRadius: 0,
                       ),
                     ],
                   ),
@@ -134,16 +134,32 @@ class _PatientDashboardState extends State<PatientDashboard> with WidgetsBinding
                     children: [
                       Row(
                         children: [
+                          // Avatar personalizado
                           Container(
-                            padding: const EdgeInsets.all(12),
+                            width: 56,
+                            height: 56,
                             decoration: BoxDecoration(
-                              color: Colors.blue.shade100,
-                              borderRadius: BorderRadius.circular(12),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Colors.blue.shade400,
+                                  Colors.blue.shade700,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blue.shade200.withValues(alpha: 0.4),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
-                            child: Icon(
-                              Icons.medical_services,
-                              color: Colors.blue.shade800,
-                              size: 24,
+                            child: const Icon(
+                              Icons.person_outline,
+                              color: Colors.white,
+                              size: 28,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -152,42 +168,90 @@ class _PatientDashboardState extends State<PatientDashboard> with WidgetsBinding
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '¡Hola Paciente!',
+                                  _getGreeting(),
                                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w700,
                                     color: Colors.blue.shade800,
+                                    letterSpacing: -0.5,
                                   ),
                                 ),
+                                const SizedBox(height: 2),
                                 Text(
-                                  'Encuentra el doctor perfecto para ti',
+                                  'Encuentra tu doctor ideal hoy',
                                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Colors.grey.shade600,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          Row(
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  _showClearDataDialog(context);
-                                },
-                                icon: Icon(
-                                  Icons.delete_forever,
-                                  color: Colors.red.shade600,
+                          // Botones de acción modernos
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    _showClearDataDialog(context);
+                                  },
+                                  icon: Icon(
+                                    Icons.refresh_rounded,
+                                    color: Colors.orange.shade600,
+                                    size: 22,
+                                  ),
+                                  tooltip: 'Limpiar datos',
                                 ),
-                              ),
-                              IconButton(
-                                onPressed: () {
-                                  _showLogoutDialog(context);
-                                },
-                                icon: Icon(
-                                  Icons.logout,
-                                  color: Colors.grey.shade600,
+                                IconButton(
+                                  onPressed: () {
+                                    _showLogoutDialog(context);
+                                  },
+                                  icon: Icon(
+                                    Icons.logout_rounded,
+                                    color: Colors.grey.shade600,
+                                    size: 22,
+                                  ),
+                                  tooltip: 'Cerrar sesión',
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      // Stats row premium
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatCard(
+                              icon: Icons.local_hospital_outlined,
+                              value: '23',
+                              label: 'Doctores',
+                              color: Colors.blue.shade600,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStatCard(
+                              icon: Icons.star_outline_rounded,
+                              value: '4.8',
+                              label: 'Rating',
+                              color: Colors.amber.shade600,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStatCard(
+                              icon: Icons.schedule_outlined,
+                              value: '24/7',
+                              label: 'Disponible',
+                              color: Colors.green.shade600,
+                            ),
                           ),
                         ],
                       ),
@@ -256,7 +320,6 @@ class _PatientDashboardState extends State<PatientDashboard> with WidgetsBinding
                                   height: 48,
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      print('🔄 Usuario presionó recargar manualmente'); // Debug log
                                       _reloadDoctors();
                                     },
                                     icon: const Icon(Icons.refresh),
@@ -306,6 +369,7 @@ class _PatientDashboardState extends State<PatientDashboard> with WidgetsBinding
                                         return DoctorCard(
                                           doctor: doctor,
                                           onTap: () => _navigateToDoctorDetail(context, doctor),
+                                          isFavorite: state.isDoctorFavorite(doctor.id.toString()),
                                         );
                                       },
                                     )
@@ -328,29 +392,55 @@ class _PatientDashboardState extends State<PatientDashboard> with WidgetsBinding
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return '¡Buenos días!';
+    } else if (hour < 18) {
+      return '¡Buenas tardes!';
+    } else {
+      return '¡Buenas noches!';
+    }
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required String value,
+    required String label,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.search_off,
-            size: 64,
-            color: Colors.grey.shade400,
+            icon,
+            color: color,
+            size: 20,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
           Text(
-            'No se encontraron doctores',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            value,
+            style: TextStyle(
+              fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade700,
+              color: color,
             ),
           ),
-          const SizedBox(height: 8),
           Text(
-            'Intenta con una búsqueda diferente',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            label,
+            style: TextStyle(
+              fontSize: 11,
               color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -358,13 +448,111 @@ class _PatientDashboardState extends State<PatientDashboard> with WidgetsBinding
     );
   }
 
-  void _navigateToDoctorDetail(BuildContext context, Doctor doctor) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DoctorDetailPage(doctor: doctor),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.blue.shade100,
+                    Colors.blue.shade200,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(60),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blue.shade200.withValues(alpha: 0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.person_search_rounded,
+                size: 60,
+                color: Colors.blue.shade600,
+              ),
+            ),
+            const SizedBox(height: 32),
+            Text(
+              'No se encontraron doctores',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Colors.grey.shade800,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Intenta con una búsqueda diferente o\nexplora otras especialidades',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey.shade600,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.blue.shade200,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.lightbulb_outline_rounded,
+                    color: Colors.blue.shade600,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Prueba buscar por "Cardiología" o "General"',
+                    style: TextStyle(
+                      color: Colors.blue.shade700,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  void _navigateToDoctorDetail(BuildContext context, Doctor doctor) async {
+    final patientBloc = context.read<PatientBloc>();
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider.value(
+          value: patientBloc,
+          child: DoctorDetailPage(doctor: doctor),
+        ),
+      ),
+    );
+    
+    // Recargar favoritos cuando regresemos del detalle
+    if (mounted) {
+      patientBloc.add(LoadFavoritesRequested());
+    }
   }
 
   void _showLogoutDialog(BuildContext context) {

@@ -7,6 +7,7 @@ class AppConstants {
   static const String authTokenKey = 'auth_token';
   static const String userDataKey = 'user_data';
   static const String userTypeKey = 'user_type';
+  static const String favoriteDoctorsKey = 'favorite_doctors';
   
   // User Types
   static const String userTypePatient = 'patient';

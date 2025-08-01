@@ -1,6 +1,6 @@
 name: mediconnect
 description: "Medical appointment app connecting patients and doctors"
-version: 1.0.0+1
+version: 1.1.0+1
 
 environment:
   sdk: ^3.8.0  # Cambiado de >=3.0.0

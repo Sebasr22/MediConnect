@@ -39,48 +39,115 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white,
+            Colors.blue.shade50.withValues(alpha: 0.3),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.blue.shade100.withValues(alpha: 0.5),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.shade100.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+            spreadRadius: 0,
+          ),
+        ],
       ),
       child: TextField(
         controller: widget.controller,
         onChanged: widget.onChanged,
         onSubmitted: (_) => widget.onSearchPressed?.call(),
         textInputAction: TextInputAction.search,
+        style: TextStyle(
+          color: Colors.grey.shade800,
+          fontWeight: FontWeight.w500,
+        ),
         decoration: InputDecoration(
-          hintText: 'Buscar por nombre o especialidad...',
-          hintStyle: TextStyle(color: Colors.grey.shade500),
-          prefixIcon: widget.onSearchPressed != null
-              ? IconButton(
-                  icon: Icon(
-                    Icons.search,
+          hintText: 'Buscar doctores, especialidades...',
+          hintStyle: TextStyle(
+            color: Colors.grey.shade500,
+            fontWeight: FontWeight.w400,
+          ),
+          prefixIcon: Container(
+            padding: const EdgeInsets.all(12),
+            child: widget.onSearchPressed != null
+                ? GestureDetector(
+                    onTap: widget.onSearchPressed,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade600,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.search_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  )
+                : Icon(
+                    Icons.search_rounded,
                     color: Colors.blue.shade600,
+                    size: 22,
                   ),
-                  onPressed: widget.onSearchPressed,
-                  tooltip: 'Buscar',
-                )
-              : Icon(
-                  Icons.search,
-                  color: Colors.grey.shade500,
-                ),
+          ),
           suffixIcon: widget.controller.text.isNotEmpty
-              ? IconButton(
-                  icon: Icon(
-                    Icons.clear,
-                    color: Colors.grey.shade500,
-                  ),
-                  onPressed: () {
-                    widget.controller.clear();
-                    widget.onChanged('');
-                  },
-                  tooltip: 'Limpiar',
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      child: IconButton(
+                        icon: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.clear_rounded,
+                            color: Colors.grey.shade600,
+                            size: 16,
+                          ),
+                        ),
+                        onPressed: () {
+                          widget.controller.clear();
+                          widget.onChanged('');
+                        },
+                        tooltip: 'Limpiar búsqueda',
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(right: 12),
+                      child: Icon(
+                        Icons.mic_outlined,
+                        color: Colors.grey.shade400,
+                        size: 20,
+                      ),
+                    ),
+                  ],
                 )
-              : null,
+              : Container(
+                  margin: const EdgeInsets.only(right: 16),
+                  child: Icon(
+                    Icons.mic_outlined,
+                    color: Colors.grey.shade400,
+                    size: 20,
+                  ),
+                ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
-            vertical: 16,
+            vertical: 18,
           ),
         ),
       ),

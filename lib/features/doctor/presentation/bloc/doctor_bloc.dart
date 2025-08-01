@@ -87,9 +87,9 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
 
   String _mapFailureToMessage(Failure failure) {
     switch (failure.runtimeType) {
-      case ServerFailure:
+      case ServerFailure _:
         return failure.message ?? 'Error del servidor. Intenta más tarde.';
-      case ConnectionFailure:
+      case ConnectionFailure _:
         return 'Sin conexión a internet. Verifica tu conexión.';
       default:
         return 'Ha ocurrido un error inesperado.';

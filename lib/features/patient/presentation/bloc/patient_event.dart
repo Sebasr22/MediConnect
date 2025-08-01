@@ -35,3 +35,16 @@ class FilterDoctorsBySpecialtyRequested extends PatientEvent {
   @override
   List<Object?> get props => [specialty];
 }
+
+class ToggleFavoriteRequested extends PatientEvent {
+  final String doctorId;
+
+  const ToggleFavoriteRequested(this.doctorId);
+
+  @override
+  List<Object> get props => [doctorId];
+}
+
+class LoadFavoritesRequested extends PatientEvent {}
+
+class FilterFavoritesDoctorsRequested extends PatientEvent {}

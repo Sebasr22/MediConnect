@@ -128,6 +128,7 @@ Future<void> _initPatientDependencies() async {
     () => PatientBloc(
       getDoctorsUseCase: getIt(),
       getDoctorByIdUseCase: getIt(),
+      storageService: getIt(),
     ),
   );
 }

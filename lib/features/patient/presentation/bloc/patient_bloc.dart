@@ -5,24 +5,28 @@ import '../../../auth/domain/entities/doctor_entity.dart';
 import '../../domain/usecases/get_doctors_usecase.dart';
 import '../../domain/usecases/get_doctor_by_id_usecase.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/storage/storage_service.dart';
 
 part 'patient_event.dart';
 part 'patient_state.dart';
 
-/// Bloc que maneja el estado y funcionalidades para pacientes
-/// Gestiona la búsqueda y filtrado de doctores
 class PatientBloc extends Bloc<PatientEvent, PatientState> {
   final GetDoctorsUseCase getDoctorsUseCase;
   final GetDoctorByIdUseCase getDoctorByIdUseCase;
+  final StorageService storageService;
 
   PatientBloc({
     required this.getDoctorsUseCase,
     required this.getDoctorByIdUseCase,
+    required this.storageService,
   }) : super(PatientInitial()) {
     on<GetDoctorsRequested>(_onGetDoctorsRequested);
     on<GetDoctorByIdRequested>(_onGetDoctorByIdRequested);
     on<SearchDoctorsRequested>(_onSearchDoctorsRequested);
     on<FilterDoctorsBySpecialtyRequested>(_onFilterDoctorsBySpecialtyRequested);
+    on<ToggleFavoriteRequested>(_onToggleFavoriteRequested);
+    on<LoadFavoritesRequested>(_onLoadFavoritesRequested);
+    on<FilterFavoritesDoctorsRequested>(_onFilterFavoritesDoctorsRequested);
   }
 
   Future<void> _onGetDoctorsRequested(
@@ -33,26 +37,34 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
 
     final result = await getDoctorsUseCase();
 
-    result.fold(
-      (failure) => emit(PatientError(_mapFailureToMessage(failure))),
-      (doctors) {
-        // Filtrar doctores con datos demasiado incompletos
+    await result.fold(
+      (failure) async => emit(PatientError(_mapFailureToMessage(failure))),
+      (doctors) async {
         final validDoctors = doctors.where((doctor) {
-          // Considerar válido si tiene al menos nombre real y especialidad
           final hasRealName = doctor.name != 'Sin nombre' && 
                              doctor.name != 'Datos incompletos' &&
                              doctor.name.isNotEmpty;
           final hasRealSpecialty = doctor.specialty != 'Sin especialidad' && 
                                   doctor.specialty.isNotEmpty;
           
-          // Requiere al menos nombre o especialidad válidos
           return hasRealName || hasRealSpecialty;
         }).toList();
         
-        emit(DoctorsLoaded(
-          doctors: validDoctors,
-          filteredDoctors: validDoctors,
-        ));
+        // Cargar favoritos junto con los doctores
+        try {
+          final favorites = await storageService.getFavoriteDoctors();
+          emit(DoctorsLoaded(
+            doctors: validDoctors,
+            filteredDoctors: validDoctors,
+            favoriteDoctorIds: favorites,
+          ));
+        } catch (e) {
+          emit(DoctorsLoaded(
+            doctors: validDoctors,
+            filteredDoctors: validDoctors,
+            favoriteDoctorIds: const [],
+          ));
+        }
       },
     );
   }
@@ -75,62 +87,43 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
     SearchDoctorsRequested event,
     Emitter<PatientState> emit,
   ) async {
-    print('🔎 SearchDoctorsRequested recibido con query: "${event.query}"'); // Debug log
-    
     if (state is DoctorsLoaded) {
       final currentState = state as DoctorsLoaded;
       final query = event.query.toLowerCase().trim();
-      
-      print('📊 Estado actual: ${currentState.doctors.length} doctores disponibles'); // Debug log
 
       if (query.isEmpty) {
-        print('🔄 Query vacío, mostrando todos los doctores'); // Debug log
         emit(currentState.copyWith(filteredDoctors: currentState.doctors));
       } else {
         final filteredDoctors = currentState.doctors.where((doctor) {
-          // Valores por defecto que no queremos buscar
           final defaultValues = {'sin nombre', 'sin especialidad', 'datos incompletos'};
           
           final doctorName = doctor.name.toLowerCase();
           final doctorSpecialty = doctor.specialty.toLowerCase();
           
-          // Búsqueda más flexible - remover acentos y caracteres especiales
           final normalizedQuery = _normalizeString(query);
           final normalizedName = _normalizeString(doctorName);
           final normalizedSpecialty = _normalizeString(doctorSpecialty);
           
-          // Búsqueda por palabras individuales también
           final queryWords = normalizedQuery.split(' ').where((word) => word.isNotEmpty);
           
           bool nameMatch = false;
           bool specialtyMatch = false;
           
           if (!defaultValues.contains(doctorName)) {
-            // Búsqueda exacta o por palabras
             nameMatch = normalizedName.contains(normalizedQuery) ||
                        queryWords.any((word) => normalizedName.contains(word));
           }
           
           if (!defaultValues.contains(doctorSpecialty)) {
-            // Búsqueda exacta o por palabras
             specialtyMatch = normalizedSpecialty.contains(normalizedQuery) ||
                            queryWords.any((word) => normalizedSpecialty.contains(word));
           }
           
-          final matches = nameMatch || specialtyMatch;
-          
-          if (matches) {
-            print('✅ Match encontrado: ${doctor.name} - ${doctor.specialty}'); // Debug log
-          }
-          
-          return matches;
+          return nameMatch || specialtyMatch;
         }).toList();
 
-        print('📋 Resultados filtrados: ${filteredDoctors.length} doctores'); // Debug log
         emit(currentState.copyWith(filteredDoctors: filteredDoctors));
       }
-    } else {
-      print('❌ Estado no es DoctorsLoaded: ${state.runtimeType}'); // Debug log
     }
   }
 
@@ -143,6 +136,18 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
 
       if (event.specialty == null || event.specialty!.isEmpty) {
         emit(currentState.copyWith(filteredDoctors: currentState.doctors));
+      } else if (event.specialty == 'populares') {
+        final popularDoctors = currentState.doctors.where((doctor) {
+          return doctor.rating >= 4.0;
+        }).toList();
+        
+        popularDoctors.sort((a, b) => b.rating.compareTo(a.rating));
+        
+        emit(currentState.copyWith(filteredDoctors: popularDoctors));
+      } else if (event.specialty == 'favoritos') {
+        final favoriteDoctors = currentState.favoriteDoctors;
+        
+        emit(currentState.copyWith(filteredDoctors: favoriteDoctors));
       } else {
         final filteredDoctors = currentState.doctors.where((doctor) {
           return doctor.specialty.toLowerCase() == event.specialty!.toLowerCase();
@@ -153,13 +158,74 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
     }
   }
 
-  String _mapFailureToMessage(Failure failure) {
-    print('💥 Error detectado: ${failure.runtimeType} - ${failure.message}'); // Debug log
+  Future<void> _onToggleFavoriteRequested(
+    ToggleFavoriteRequested event,
+    Emitter<PatientState> emit,
+  ) async {
+    if (state is! DoctorsLoaded) {
+      return;
+    }
     
+    try {
+      final currentState = state as DoctorsLoaded;
+      await storageService.toggleFavoriteDoctor(event.doctorId);
+      final updatedFavorites = await storageService.getFavoriteDoctors();
+      
+      List<Doctor> updatedFilteredDoctors = currentState.filteredDoctors;
+      
+      if (currentState.filteredDoctors.length != currentState.doctors.length) {
+        final favoriteDoctors = currentState.doctors
+            .where((doctor) => updatedFavorites.contains(doctor.id.toString()))
+            .toList();
+        
+        if (currentState.filteredDoctors.length == currentState.favoriteDoctors.length) {
+          updatedFilteredDoctors = favoriteDoctors;
+        }
+      }
+      emit(currentState.copyWith(
+        favoriteDoctorIds: updatedFavorites,
+        filteredDoctors: updatedFilteredDoctors,
+      ));
+      
+    } catch (e) {
+      emit(PatientError('Error al cambiar favorito: $e'));
+    }
+  }
+
+  Future<void> _onLoadFavoritesRequested(
+    LoadFavoritesRequested event,
+    Emitter<PatientState> emit,
+  ) async {
+    try {
+      final favorites = await storageService.getFavoriteDoctors();
+      
+      if (state is DoctorsLoaded) {
+        final currentState = state as DoctorsLoaded;
+        emit(currentState.copyWith(favoriteDoctorIds: favorites));
+      }
+      
+    } catch (e) {
+      emit(PatientError('Error al cargar favoritos: $e'));
+    }
+  }
+
+  Future<void> _onFilterFavoritesDoctorsRequested(
+    FilterFavoritesDoctorsRequested event,
+    Emitter<PatientState> emit,
+  ) async {
+    if (state is DoctorsLoaded) {
+      final currentState = state as DoctorsLoaded;
+      final favoriteDoctors = currentState.favoriteDoctors;
+      
+      emit(currentState.copyWith(filteredDoctors: favoriteDoctors));
+    }
+  }
+
+  String _mapFailureToMessage(Failure failure) {
     switch (failure.runtimeType) {
-      case ServerFailure:
+      case ServerFailure _:
         return failure.message ?? 'Error del servidor. Intenta más tarde.';
-      case ConnectionFailure:
+      case ConnectionFailure _:
         return failure.message ?? 'Sin conexión a internet. Verifica tu conexión.';
       default:
         // Incluir información específica del error
@@ -168,7 +234,6 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
     }
   }
   
-  /// Normaliza un string removiendo acentos y caracteres especiales
   String _normalizeString(String input) {
     return input
         .replaceAll(RegExp(r'[áàäâã]'), 'a')

@@ -23,10 +23,53 @@ class AppointmentModel extends Appointment {
   }) : super(
     doctorId: doctorIdField,
     patientName: patientNameField,
-    date: DateTime.parse(dateString),
+    date: _parseDate(dateString),
   );
 
-  factory AppointmentModel.fromJson(Map<String, dynamic> json) => _$AppointmentModelFromJson(json);
+  static DateTime _parseDate(String dateString) {
+    try {
+      return DateTime.parse(dateString);
+    } catch (e) {
+      // If date parsing fails, return current date
+      return DateTime.now();
+    }
+  }
+
+  factory AppointmentModel.fromJson(Map<String, dynamic> json) {
+    try {
+      // Handle potentially large IDs
+      final id = json['id'] is String 
+          ? int.parse(json['id']) 
+          : (json['id'] as num).toInt();
+      
+      // Safe handling of required fields with defaults
+      final doctorId = json['doctorId'] is String 
+          ? int.parse(json['doctorId']) 
+          : (json['doctorId'] as num?)?.toInt() ?? 0;
+      
+      final patientName = json['patientName'] as String? ?? 'Sin nombre';
+      final dateString = json['date'] as String? ?? DateTime.now().toIso8601String().split('T')[0];
+      
+      return AppointmentModel(
+        id: id,
+        doctorIdField: doctorId,
+        patientNameField: patientName,
+        dateString: dateString,
+      );
+    } catch (e) {
+      // If parsing fails, create appointment with minimal valid data
+      final id = json['id'] is String 
+          ? int.tryParse(json['id']) ?? 0
+          : (json['id'] as num?)?.toInt() ?? 0;
+          
+      return AppointmentModel(
+        id: id,
+        doctorIdField: 0,
+        patientNameField: 'Datos incompletos',
+        dateString: DateTime.now().toIso8601String().split('T')[0],
+      );
+    }
+  }
   
   Map<String, dynamic> toJson() => _$AppointmentModelToJson(this);
 
@@ -36,7 +79,7 @@ class AppointmentModel extends Appointment {
       id: id,
       doctorId: doctorIdField,
       patientName: patientNameField,
-      date: DateTime.parse(dateString),
+      date: _parseDate(dateString),
     );
   }
 

@@ -7,13 +7,11 @@ import 'core/utils/injection.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Configurar orientaciones permitidas
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  // Inicializar dependencias
   await initializeDependencies();
   
   runApp(const MediConnectApp());

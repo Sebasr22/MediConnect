@@ -13,6 +13,8 @@ class DoctorLoading extends DoctorState {}
 
 class CreatingAppointment extends DoctorState {}
 
+class UpdatingAppointment extends DoctorState {}
+
 class AppointmentsLoaded extends DoctorState {
   final List<Appointment> appointments;
   final List<Appointment> filteredAppointments;
@@ -55,6 +57,15 @@ class AppointmentCreated extends DoctorState {
   final Appointment appointment;
 
   const AppointmentCreated(this.appointment);
+
+  @override
+  List<Object> get props => [appointment];
+}
+
+class AppointmentUpdated extends DoctorState {
+  final Appointment appointment;
+
+  const AppointmentUpdated(this.appointment);
 
   @override
   List<Object> get props => [appointment];

@@ -43,3 +43,18 @@ class FilterAppointmentsByDateRequested extends DoctorEvent {
   @override
   List<Object?> get props => [startDate, endDate];
 }
+
+class UpdateAppointmentRequested extends DoctorEvent {
+  final int appointmentId;
+  final String patientName;
+  final DateTime date;
+
+  const UpdateAppointmentRequested({
+    required this.appointmentId,
+    required this.patientName,
+    required this.date,
+  });
+
+  @override
+  List<Object> get props => [appointmentId, patientName, date];
+}

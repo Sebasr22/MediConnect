@@ -20,6 +20,7 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
     on<GetAppointmentsRequested>(_onGetAppointmentsRequested);
     on<CreateAppointmentRequested>(_onCreateAppointmentRequested);
     on<FilterAppointmentsByDateRequested>(_onFilterAppointmentsByDateRequested);
+    on<UpdateAppointmentRequested>(_onUpdateAppointmentRequested);
   }
 
   Future<void> _onGetAppointmentsRequested(
@@ -43,9 +44,9 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
     CreateAppointmentRequested event,
     Emitter<DoctorState> emit,
   ) async {
-    if (state is AppointmentsLoaded) {
-      emit(CreatingAppointment());
+    emit(CreatingAppointment());
 
+    try {
       final result = await createAppointmentUseCase(
         CreateAppointmentParams(
           doctorId: event.doctorId,
@@ -55,13 +56,18 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
       );
 
       result.fold(
-        (failure) => emit(DoctorError(_mapFailureToMessage(failure))),
+        (failure) {
+          emit(DoctorError(_mapFailureToMessage(failure)));
+        },
         (newAppointment) {
-          // Refresh appointments list
-          add(GetAppointmentsRequested(event.doctorId));
+          // First emit success for UI feedback
           emit(AppointmentCreated(newAppointment));
+          // Then refresh appointments list
+          add(GetAppointmentsRequested(event.doctorId));
         },
       );
+    } catch (e) {
+      emit(const DoctorError('Error inesperado al crear la cita'));
     }
   }
 
@@ -82,6 +88,64 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
 
         emit(currentState.copyWith(filteredAppointments: filteredAppointments));
       }
+    }
+  }
+
+  Future<void> _onUpdateAppointmentRequested(
+    UpdateAppointmentRequested event,
+    Emitter<DoctorState> emit,
+  ) async {
+    if (state is AppointmentsLoaded) {
+      final currentState = state as AppointmentsLoaded;
+      emit(UpdatingAppointment());
+
+      // Simulate update for now until backend is ready
+      await Future.delayed(const Duration(seconds: 1));
+
+      try {
+        // Find and update the appointment in the list
+        final updatedAppointments = currentState.appointments.map((appointment) {
+          if (appointment.id == event.appointmentId) {
+            return Appointment(
+              id: appointment.id,
+              doctorId: appointment.doctorId,
+              patientName: event.patientName,
+              date: event.date,
+            );
+          }
+          return appointment;
+        }).toList();
+
+        // Update filtered appointments as well
+        final updatedFilteredAppointments = currentState.filteredAppointments.map((appointment) {
+          if (appointment.id == event.appointmentId) {
+            return Appointment(
+              id: appointment.id,
+              doctorId: appointment.doctorId,
+              patientName: event.patientName,
+              date: event.date,
+            );
+          }
+          return appointment;
+        }).toList();
+
+        final updatedAppointment = updatedAppointments.firstWhere(
+          (appointment) => appointment.id == event.appointmentId,
+        );
+
+        // First emit the success state for the UI to handle
+        emit(AppointmentUpdated(updatedAppointment));
+        
+        // Then update the appointments list
+        emit(AppointmentsLoaded(
+          appointments: updatedAppointments,
+          filteredAppointments: updatedFilteredAppointments,
+        ));
+      } catch (e) {
+        emit(const DoctorError('Error al actualizar la cita'));
+      }
+    } else {
+      emit(const DoctorError('No se pudo actualizar la cita'));
     }
   }
 

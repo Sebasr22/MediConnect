@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/injection.dart';
 import '../../../../core/navigation/app_router.dart';
-import '../../../../core/storage/storage_service.dart';
 import '../../../auth/domain/entities/doctor_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../bloc/patient_bloc.dart';
@@ -192,32 +191,16 @@ class _PatientDashboardState extends State<PatientDashboard> with WidgetsBinding
                               color: Colors.white.withValues(alpha: 0.8),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    _showClearDataDialog(context);
-                                  },
-                                  icon: Icon(
-                                    Icons.refresh_rounded,
-                                    color: Colors.orange.shade600,
-                                    size: 22,
-                                  ),
-                                  tooltip: 'Limpiar datos',
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    _showLogoutDialog(context);
-                                  },
-                                  icon: Icon(
-                                    Icons.logout_rounded,
-                                    color: Colors.grey.shade600,
-                                    size: 22,
-                                  ),
-                                  tooltip: 'Cerrar sesión',
-                                ),
-                              ],
+                            child: IconButton(
+                              onPressed: () {
+                                _showLogoutDialog(context);
+                              },
+                              icon: Icon(
+                                Icons.logout_rounded,
+                                color: Colors.grey.shade600,
+                                size: 22,
+                              ),
+                              tooltip: 'Cerrar sesión',
                             ),
                           ),
                         ],
@@ -583,42 +566,4 @@ class _PatientDashboardState extends State<PatientDashboard> with WidgetsBinding
     );
   }
 
-  void _showClearDataDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Limpiar Datos'),
-          content: const Text('¿Limpiar TODOS los datos guardados? Esto te llevará al login.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(dialogContext).pop();
-                try {
-                  final storageService = getIt<StorageService>();
-                  await storageService.clearAllUserData();
-                  await storageService.clearSharedPreferences();
-                  await storageService.clearSecureStorage();
-                  if (context.mounted) {
-                    context.go(AppRouter.login);
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    context.go(AppRouter.login);
-                  }
-                }
-              },
-              child: const Text('Limpiar Todo'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

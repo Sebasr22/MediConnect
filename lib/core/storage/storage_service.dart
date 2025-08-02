@@ -279,6 +279,8 @@ class StorageService {
       await Future.wait([
         clearSecureStorage(),
         removeUserType(),
+        clearFavorites(),
+        clearSharedPreferences(),
       ]);
     } catch (e) {
       throw const CacheException('Error al limpiar datos de usuario');

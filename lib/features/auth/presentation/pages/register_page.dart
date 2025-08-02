@@ -9,6 +9,7 @@ import '../bloc/auth_bloc.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/user_type_selector.dart';
+import '../widgets/modern_date_field.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -81,9 +82,9 @@ class _RegisterPageState extends State<RegisterPage> {
               );
               // Navigate to appropriate dashboard
               if (state.isDoctor) {
-                context.go(AppRouter.doctorDashboard, extra: state.user);
+                context.go(AppRouter.doctorDashboard);
               } else if (state.isPatient) {
-                context.go(AppRouter.patientDashboard, extra: state.user);
+                context.go(AppRouter.patientDashboard);
               }
             }
           },
@@ -93,9 +94,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Colors.green.shade800,
-                  Colors.green.shade600,
-                  Colors.teal.shade400,
+                  Colors.blue.shade800,
+                  Colors.blue.shade600,
+                  Colors.cyan.shade500,
+                  Colors.blue.shade400,
                 ],
               ),
             ),
@@ -126,7 +128,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     Icon(
                                       Icons.person_add,
                                       size: 60,
-                                      color: Colors.green.shade800,
+                                      color: Colors.blue.shade800,
                                     ),
                                     const SizedBox(height: 12),
                                     Text(
@@ -136,7 +138,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                           .headlineSmall
                                           ?.copyWith(
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.green.shade800,
+                                            color: Colors.blue.shade800,
                                           ),
                                     ),
                                     const SizedBox(height: 4),
@@ -245,7 +247,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               return CustomButton(
                                 text: 'Crear Cuenta',
                                 isLoading: state is AuthLoading,
-                                backgroundColor: Colors.green.shade800,
+                                backgroundColor: Colors.blue.shade800,
                                 onPressed: () => _submitForm(context),
                               );
                             },
@@ -267,35 +269,17 @@ class _RegisterPageState extends State<RegisterPage> {
     return Column(
       children: [
         // Birthdate Field
-        GestureDetector(
-          onTap: () => _selectBirthdate(context),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.calendar_today, color: Colors.grey.shade600),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    _selectedBirthdate != null
-                        ? '${_selectedBirthdate!.day}/${_selectedBirthdate!.month}/${_selectedBirthdate!.year}'
-                        : 'Fecha de Nacimiento',
-                    style: TextStyle(
-                      color: _selectedBirthdate != null
-                          ? Colors.black
-                          : Colors.grey.shade400,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+        ModernDateField(
+          selectedDate: _selectedBirthdate,
+          label: 'Fecha de Nacimiento',
+          hintText: 'Selecciona tu fecha de nacimiento',
+          prefixIcon: Icons.calendar_today,
+          focusColor: Colors.blue.shade600,
+          onDateSelected: (date) {
+            setState(() {
+              _selectedBirthdate = date;
+            });
+          },
         ),
         const SizedBox(height: 16),
       ],
@@ -384,39 +368,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Future<void> _selectBirthdate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now().subtract(
-        const Duration(days: 365 * 25),
-      ), // 25 years ago
-      firstDate: DateTime.now().subtract(
-        const Duration(days: 365 * 100),
-      ), // 100 years ago
-      lastDate: DateTime.now().subtract(
-        const Duration(days: 365 * 16),
-      ), // 16 years ago
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Colors.green.shade800,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && picked != _selectedBirthdate) {
-      setState(() {
-        _selectedBirthdate = picked;
-      });
-    }
-  }
 
   void _submitForm(BuildContext context) {
     if (_formKey.currentState!.validate()) {

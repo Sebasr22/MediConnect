@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/patient/presentation/pages/patient_dashboard.dart';
@@ -61,8 +60,7 @@ class AppRouter {
         path: doctorDashboard,
         name: 'doctor-dashboard',
         builder: (context, state) {
-          final user = state.extra as User;
-          return DoctorDashboard(doctor: user);
+          return const DoctorDashboard();
         },
       ),
     ],

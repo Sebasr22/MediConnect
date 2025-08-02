@@ -24,12 +24,27 @@ class UserModel extends User {
         ? int.parse(json['id']) 
         : (json['id'] as num).toInt();
     
+    // Infer user type if 'type' field is missing
+    String? userType = json['type'] as String?;
+    
+    if (userType == null) {
+      // Infer type based on present fields
+      if (json.containsKey('specialty') && json.containsKey('rating')) {
+        userType = 'doctor';
+      } else if (json.containsKey('birthdate')) {
+        userType = 'patient';
+      } else {
+        // Default fallback - this shouldn't happen in normal flow
+        userType = 'user';
+      }
+    }
+    
     return UserModel(
       id: id,
       name: json['name'] as String,
       email: json['email'] as String,
       phone: json['phone'] as String,
-      type: json['type'] as String,
+      type: userType,
       password: json['password'] as String?,
     );
   }

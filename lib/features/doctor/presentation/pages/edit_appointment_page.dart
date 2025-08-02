@@ -2,27 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/validators.dart';
+import '../../../auth/domain/entities/appointment_entity.dart';
 import '../../../auth/presentation/widgets/custom_text_field.dart';
 import '../../../auth/presentation/widgets/custom_button.dart';
 import '../bloc/doctor_bloc.dart';
 
-class CreateAppointmentPage extends StatefulWidget {
-  final int doctorId;
+class EditAppointmentPage extends StatefulWidget {
+  final Appointment appointment;
 
-  const CreateAppointmentPage({
+  const EditAppointmentPage({
     super.key,
-    required this.doctorId,
+    required this.appointment,
   });
 
   @override
-  State<CreateAppointmentPage> createState() => _CreateAppointmentPageState();
+  State<EditAppointmentPage> createState() => _EditAppointmentPageState();
 }
 
-class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
+class _EditAppointmentPageState extends State<EditAppointmentPage> {
   final _formKey = GlobalKey<FormState>();
   final _patientNameController = TextEditingController();
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-populate fields with existing appointment data
+    _patientNameController.text = widget.appointment.patientName;
+    _selectedDate = DateTime(
+      widget.appointment.date.year,
+      widget.appointment.date.month,
+      widget.appointment.date.day,
+    );
+    _selectedTime = TimeOfDay(
+      hour: widget.appointment.date.hour,
+      minute: widget.appointment.date.minute,
+    );
+  }
 
   @override
   void dispose() {
@@ -56,11 +73,12 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                       backgroundColor: Colors.red,
                     ),
                   );
-                } else if (state is AppointmentCreated) {
+                } else if (state is AppointmentUpdated) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('¡Cita creada exitosamente!'),
-                      backgroundColor: Colors.green,
+                      content: Text('Simulación: Cita editada exitosamente\n(Los cambios no se guardan permanentemente)'),
+                      backgroundColor: Colors.orange,
+                      duration: Duration(seconds: 4),
                     ),
                   );
                   Navigator.pop(context);
@@ -82,7 +100,7 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                         ),
                         const Expanded(
                           child: Text(
-                            'Nueva Cita',
+                            'Editar Cita',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -112,7 +130,7 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                       ],
                     ),
                     child: Icon(
-                      Icons.event_note,
+                      Icons.edit_calendar_rounded,
                       size: 50,
                       color: Colors.teal.shade800,
                     ),
@@ -142,7 +160,7 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Información de la Cita',
+                                'Editar Información',
                                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.teal.shade800,
@@ -169,12 +187,12 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
 
                               const Spacer(),
 
-                              // Create Button
+                              // Update Button
                               BlocBuilder<DoctorBloc, DoctorState>(
                                 builder: (context, state) {
                                   return CustomButton(
-                                    text: 'Crear Cita',
-                                    isLoading: state is CreatingAppointment,
+                                    text: 'Actualizar Cita',
+                                    isLoading: state is UpdatingAppointment,
                                     backgroundColor: Colors.teal.shade600,
                                     onPressed: _submitForm,
                                   );
@@ -375,8 +393,8 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
       );
 
       context.read<DoctorBloc>().add(
-        CreateAppointmentRequested(
-          doctorId: widget.doctorId,
+        UpdateAppointmentRequested(
+          appointmentId: widget.appointment.id,
           patientName: _patientNameController.text.trim(),
           date: appointmentDateTime,
         ),

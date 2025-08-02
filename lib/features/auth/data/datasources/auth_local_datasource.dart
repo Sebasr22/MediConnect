@@ -17,7 +17,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<void> saveUserData(UserModel user) async {
     try {
-      await storageService.saveUserDataSecure(user.toJson());
+      final userData = user.toJson();
+      await storageService.saveUserDataSecure(userData);
     } catch (e) {
       throw const CacheException('Error al guardar datos de usuario');
     }

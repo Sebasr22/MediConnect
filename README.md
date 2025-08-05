@@ -142,7 +142,7 @@ Durante el desarrollo tomé decisiones arquitectónicas específicas:
 
 3. **Manejo de Errores Robusto**: Implementé estados de error específicos en cada BLoC y fallbacks UI para mantener la app estable.
 
-4. **Inyección de Dependencias Avanzada**: Configuré GetIt con factories para los BLoCs y singletons para los servicios, permitiendo re-registro dinámico cuando es necesario.
+4. **Gestión de Dependencias**: Configuré GetIt para mantener servicios compartidos pero crear nuevas instancias de BLoCs para cada sesión de usuario, evitando contaminación de datos.
 
 ## Contacto
 

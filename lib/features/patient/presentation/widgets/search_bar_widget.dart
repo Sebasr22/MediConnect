@@ -20,7 +20,6 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
   @override
   void initState() {
     super.initState();
-    // Escuchar cambios en el controller para actualizar el suffixIcon
     widget.controller.addListener(_onTextChanged);
   }
 
@@ -31,8 +30,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
   }
 
   void _onTextChanged() {
-    // Actualizar el estado cuando cambie el texto
-    setState(() {});
+    setState(() {}); 
   }
 
   @override
@@ -101,49 +99,29 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                   ),
           ),
           suffixIcon: widget.controller.text.isNotEmpty
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      child: IconButton(
-                        icon: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.clear_rounded,
-                            color: Colors.grey.shade600,
-                            size: 16,
-                          ),
-                        ),
-                        onPressed: () {
-                          widget.controller.clear();
-                          widget.onChanged('');
-                        },
-                        tooltip: 'Limpiar búsqueda',
+              ? Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  child: IconButton(
+                    icon: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(right: 12),
                       child: Icon(
-                        Icons.mic_outlined,
-                        color: Colors.grey.shade400,
-                        size: 20,
+                        Icons.clear_rounded,
+                        color: Colors.grey.shade600,
+                        size: 16,
                       ),
                     ),
-                  ],
-                )
-              : Container(
-                  margin: const EdgeInsets.only(right: 16),
-                  child: Icon(
-                    Icons.mic_outlined,
-                    color: Colors.grey.shade400,
-                    size: 20,
+                    onPressed: () {
+                      widget.controller.clear();
+                      widget.onChanged('');
+                    },
+                    tooltip: 'Limpiar búsqueda',
                   ),
-                ),
+                )
+              : null,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,

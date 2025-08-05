@@ -30,46 +30,69 @@ import 'constants.dart';
 
 final getIt = GetIt.instance;
 
+/// Re-registra un BLoC específico si no está disponible
+Future<void> ensureBlocRegistered<T extends Object>() async {
+  if (!getIt.isRegistered<T>()) {
+    if (T == DoctorBloc) {
+      await _initDoctorDependencies();
+    } else if (T == PatientBloc) {
+      await _initPatientDependencies();
+    } else if (T == AuthBloc) {
+      await _initAuthDependencies();
+    }
+  }
+}
+
 Future<void> initializeDependencies() async {
-  // External dependencies
-  final sharedPreferences = await SharedPreferences.getInstance();
-  getIt.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
+  try {
+    // Starting dependency initialization...
+    
+    // External dependencies
+    // Initializing SharedPreferences...
+    final sharedPreferences = await SharedPreferences.getInstance();
+    getIt.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
 
-  const secureStorage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-    iOptions: IOSOptions(
-      accessibility: KeychainAccessibility.first_unlock_this_device,
-    ),
-  );
-  getIt.registerLazySingleton<FlutterSecureStorage>(() => secureStorage);
-
-  // Dio configuration
-  final dio = Dio(
-    BaseOptions(
-      baseUrl: AppConstants.apiBaseUrl,
-      connectTimeout: const Duration(
-        milliseconds: AppConstants.connectionTimeout,
+    // Initializing SecureStorage...
+    const secureStorage = FlutterSecureStorage(
+      aOptions: AndroidOptions(encryptedSharedPreferences: true),
+      iOptions: IOSOptions(
+        accessibility: KeychainAccessibility.first_unlock_this_device,
       ),
-      receiveTimeout: const Duration(milliseconds: AppConstants.receiveTimeout),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    ),
-  );
+    );
+    getIt.registerLazySingleton<FlutterSecureStorage>(() => secureStorage);
 
-  getIt.registerLazySingleton<Dio>(() => dio);
+    // Dio configuration
+    // Configuring HTTP client...
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: AppConstants.apiBaseUrl,
+        connectTimeout: const Duration(
+          milliseconds: AppConstants.connectionTimeout,
+        ),
+        receiveTimeout: const Duration(milliseconds: AppConstants.receiveTimeout),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
 
-  // Core services
-  getIt.registerLazySingleton<DioClient>(() => DioClient(getIt()));
-  getIt.registerLazySingleton<StorageService>(
-    () => StorageService(secureStorage: getIt(), sharedPreferences: getIt()),
-  );
+    getIt.registerLazySingleton<Dio>(() => dio);
 
-  // Initialize feature dependencies
-  await _initAuthDependencies();
-  await _initPatientDependencies();
-  await _initDoctorDependencies();
+    // Core services
+    // Registering core services...
+    getIt.registerLazySingleton<DioClient>(() => DioClient(getIt()));
+    getIt.registerLazySingleton<StorageService>(
+      () => StorageService(secureStorage: getIt(), sharedPreferences: getIt()),
+    );
+
+    // Initialize feature dependencies
+    await _initAuthDependencies();
+    await _initPatientDependencies();
+    await _initDoctorDependencies();
+  } catch (e) {
+    rethrow;
+  }
 }
 
 Future<void> _initAuthDependencies() async {

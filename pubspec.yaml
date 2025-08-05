@@ -1,32 +1,32 @@
 name: mediconnect
 description: "Medical appointment app connecting patients and doctors"
-version: 1.2.0+1
+version: 1.3.0+2
 
 environment:
-  sdk: ^3.8.0  # Cambiado de >=3.0.0
+  sdk: ^3.8.0
 
 dependencies:
   flutter:
     sdk: flutter
   
   # State Management
-  flutter_bloc: ^8.1.3
+  flutter_bloc: ^8.1.6
   
   # HTTP Client
   dio: ^5.4.0
   
   # Navigation
-  go_router: ^12.1.3
+  go_router: ^14.2.7
   
   # Storage
   flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.2
   
   # Forms & Validation
-  formz: ^0.6.1
+  formz: ^0.7.0
   
   # Dependency Injection
-  get_it: ^7.6.4
+  get_it: ^7.7.0
   
   # Utils
   equatable: ^2.0.5
@@ -36,7 +36,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
   json_serializable: ^6.7.1
   build_runner: ^2.4.7
 

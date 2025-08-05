@@ -1,154 +1,118 @@
-# 🏥 MediConnect
+# MediConnect 🏥
 
-Una aplicación móvil moderna para gestionar citas médicas que conecta pacientes y doctores de manera eficiente.
+## Características Principales
 
-## 📱 Características
+### Funcionalidades para Pacientes
+- Exploración y búsqueda de doctores por especialidad
+- Visualización de perfiles médicos con información detallada
+- Sistema de filtros para encontrar especialistas específicos
+- Interfaz intuitiva para navegar entre doctores
 
-### Para Pacientes
-- 🔍 **Búsqueda de doctores** por nombre y especialidad
-- 📋 **Lista completa de doctores** con información detallada
-- ⭐ **Calificaciones y especialidades** visibles
-- 📞 **Información de contacto** de los doctores
-- 🎯 **Filtros por especialidad** para búsqueda rápida
+### Funcionalidades para Doctores  
+- Dashboard personalizado con métricas de citas
+- Gestión completa del calendario de citas
+- Creación y programación de nuevas citas
+- Filtros por rango de fechas para organizar la agenda
+- Estadísticas visuales de la actividad médica
 
-### Para Doctores
-- 📊 **Dashboard con estadísticas** de citas
-- 📅 **Gestión de citas** por fecha
-- ➕ **Creación de nuevas citas**
-- 🗓️ **Filtros de fecha** personalizables
-- 📈 **Estadísticas visuales** de la actividad
+### Características Técnicas
+- Almacenamiento seguro de credenciales
+- Manejo robusto de errores y estados de carga
+- Interfaz responsive que se adapta a diferentes tamaños de pantalla
+- Implementación completa de Clean Architecture
 
-### Características Generales
-- 🔐 **Autenticación segura** para pacientes y doctores
-- 🎨 **Interfaz moderna** con Material Design 3
-- 📱 **Responsive design** adaptado a diferentes pantallas
-- 🔄 **Manejo de estados** con BLoC pattern
-- 🏗️ **Clean Architecture** para mantenibilidad
+## Stack Tecnológico
 
-## 🛠️ Tecnologías Utilizadas
-
-- **Flutter** - Framework de desarrollo multiplataforma
-- **Dart** - Lenguaje de programación
-- **BLoC Pattern** - Gestión de estado
-- **Go Router** - Navegación declarativa
-- **Dio** - Cliente HTTP para APIs
-- **Flutter Secure Storage** - Almacenamiento seguro
-- **Get It** - Inyección de dependencias
-- **Equatable** - Comparación de objetos
-- **JSON Serializable** - Serialización automática
-
-## 🚀 Instalación y Configuración
-
-### Prerrequisitos
-
-Antes de ejecutar la aplicación, asegúrate de tener instalado:
-
-- **Flutter SDK** (versión 3.0 o superior)
-- **Dart SDK** (incluido con Flutter)
-- **Android Studio** o **VS Code** con extensiones de Flutter
-- **Git** para clonar el repositorio
-
-#### Verificar instalación de Flutter:
-```bash
-flutter doctor
+```yaml
+# Dependencias principales
+flutter_bloc                 # Gestión de estado reactiva
+go_router                    # Navegación declarativa
+dio                          # Cliente HTTP con interceptors
+flutter_secure_storage       # Almacenamiento encriptado
+get_it                       # Inyección de dependencias
 ```
 
-### 📥 Clonar el Repositorio
+**Por qué estas tecnologías:**
+- **BLoC Pattern**: Para una gestión de estado predecible y testeable
+- **Go Router**: Navegación declarativa que facilita deep linking
+- **Dio**: Cliente HTTP robusto con manejo de interceptors y errores
+- **Get It**: Inyección de dependencias limpia y eficiente
 
-```bash
-git clone https://github.com/Sebasr22/MediConnect.git
-cd MediConnect
-```
+## Configuración del Proyecto
 
-### 📦 Instalar Dependencias
+### Instalación
 
-```bash
-flutter pub get
-```
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/Sebasr22/MediConnect.git
+   cd MediConnect
+   ```
 
-### 🔧 Generar Archivos Automáticos
+2. **Instalar dependencias**
+   ```bash
+   flutter pub get
+   ```
 
-La aplicación utiliza code generation para modelos JSON. Ejecuta:
+3. **Generar código automático**
+   
+   El proyecto utiliza code generation para los modelos JSON:
+   ```bash
+   flutter packages pub run build_runner build --delete-conflicting-outputs
+   ```
 
-```bash
-flutter packages pub run build_runner build --delete-conflicting-outputs
-```
+4. **Ejecutar la aplicación**
+   ```bash
+   flutter run
+   ```
 
-### 📱 Ejecutar la Aplicación
+## Credenciales de Prueba
 
-#### En Android:
-```bash
-flutter run
-```
+Para probar la aplicación, utiliza estas credenciales:
 
-#### En iOS (solo en macOS):
-```bash
-flutter run
-```
+**Cuenta de Paciente:**
+- Email: `usuario-2@mail.com`
+- Contraseña: `Usuario-1`
 
-#### En Web:
-```bash
-flutter run -d chrome
-```
+**Cuenta de Doctor:**
+- Email: `usuario-3@mail.com`
+- Contraseña: `Usuario-1`
 
-## 🎯 Credenciales de Prueba
+## Arquitectura del Proyecto
 
-Para probar la aplicación, puedes usar estas credenciales:
-
-### Paciente:
-- **Email:** `usuario-2@mail.com`
-- **Contraseña:** `Usuario-1`
-
-### Doctor:
-- **Email:** `juan@example.com`
-- **Contraseña:** `mysecurepassword`
-
-## 🌐 API Backend
-
-La aplicación se conecta a un backend desplegado en:
-- **Base URL:** `http://164.92.126.218:3000`
-
-### Endpoints principales:
-- `POST /auth/login` - Iniciar sesión
-- `POST /auth/register` - Registrar usuario
-- `GET /patients/doctors` - Obtener lista de doctores
-- `GET /patients/doctors/{id}` - Detalles de doctor específico
-- `GET /doctors/{id}/appointments` - Citas de un doctor
-- `POST /doctors/{id}/appointments` - Crear nueva cita
-
-## 🏗️ Arquitectura del Proyecto
-
-El proyecto sigue los principios de **Clean Architecture** y utiliza el patrón **BLoC** para la gestión de estado:
+Implementé Clean Architecture para mantener la separación de responsabilidades y facilitar el testing:
 
 ```
 lib/
-├── core/                    # Funcionalidades compartidas
-│   ├── error/              # Manejo de errores
-│   ├── navigation/         # Configuración de rutas
-│   ├── network/            # Cliente HTTP
-│   ├── storage/            # Almacenamiento seguro
-│   └── utils/              # Utilidades y constantes
-├── features/               # Características de la aplicación
-│   ├── auth/               # Autenticación
-│   │   ├── data/          # Models, DataSources, Repositories
-│   │   ├── domain/        # Entities, Use Cases, Repositories
-│   │   └── presentation/  # BLoC, Pages, Widgets
-│   ├── patient/           # Funcionalidades de pacientes
-│   └── doctor/            # Funcionalidades de doctores
-└── main.dart              # Punto de entrada
+├── core/                 # Lógica compartida
+│   ├── error/           # Manejo centralizado de errores
+│   ├── navigation/      # Configuración de rutas
+│   ├── network/         # Cliente HTTP personalizado
+│   ├── storage/         # Capa de persistencia
+│   └── utils/           # Utilidades y configuración
+├── features/            # Módulos por funcionalidad
+│   ├── auth/           # Autenticación
+│   ├── patient/        # Funcionalidades de paciente
+│   └── doctor/         # Funcionalidades de doctor
 ```
 
-### Capas de la Arquitectura:
+### Decisiones de Arquitectura
 
-1. **Presentation Layer**: Widgets, Pages, BLoCs
-2. **Domain Layer**: Entities, Use Cases, Repository Interfaces
-3. **Data Layer**: Models, Data Sources, Repository Implementations
+**Clean Architecture + BLoC:**
+- **Presentation**: Widgets y BLoCs para manejo de UI y estado
+- **Domain**: Entidades y casos de uso con lógica de negocio
+- **Data**: Modelos, fuentes de datos y repositorios
 
-## 🔧 Solución de Problemas
+**Beneficios obtenidos:**
+- Código altamente testeable
+- Separación clara de responsabilidades  
+- Facilidad para agregar nuevas características
+- Mantenimiento simplificado
 
-### Problemas Comunes:
+## Solución de Problemas
 
-#### Error al generar archivos .g.dart:
+### Errores Comunes y Soluciones
+
+**Error en code generation:**
 ```bash
 flutter clean
 flutter pub get
@@ -156,38 +120,31 @@ flutter packages pub run build_runner clean
 flutter packages pub run build_runner build --delete-conflicting-outputs
 ```
 
-#### Error de dependencias:
+**Problemas de dependencias:**
 ```bash
 flutter clean
 flutter pub cache repair
 flutter pub get
 ```
 
-#### La app se queda en la pantalla de carga:
-- Usa el botón de **papelera roja** (🗑️) en el dashboard para limpiar datos
-- O limpia los datos de la app desde configuración del dispositivo
+**App se queda en pantalla de carga:**
+- Usa las credenciales de prueba exactas
+- Verifica conexión a internet
+- La API puede tardar unos segundos en responder
 
-#### Error de conexión con la API:
-- Verifica que tengas conexión a internet
-- La API está desplegada en `http://164.92.126.218:3000`
+## Decisiones Técnicas Destacadas
 
-## 🤝 Contribuir
+Durante el desarrollo tomé decisiones arquitectónicas específicas:
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+1. **Arquitectura de Estado**: Implementé BLoCs separados (Auth, Patient, Doctor) con comunicación a través del sistema de logout para evitar contaminación de datos entre usuarios.
 
-## 📄 Licencia
+2. **Navegación Adaptativa**: Configuré GoRouter para redirigir automáticamente según el tipo de usuario autenticado, simplificando la UX.
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+3. **Manejo de Errores Robusto**: Implementé estados de error específicos en cada BLoC y fallbacks UI para mantener la app estable.
 
-## 📞 Contacto
+4. **Inyección de Dependencias Avanzada**: Configuré GetIt con factories para los BLoCs y singletons para los servicios, permitiendo re-registro dinámico cuando es necesario.
 
-**Desarrollador:** Sebastián Rodríguez
-**GitHub:** [https://github.com/Sebasr22](https://github.com/Sebasr22)
+## Contacto
 
----
-
-⭐ Si te gusta este proyecto, ¡dale una estrella en GitHub!
+**Sebastián Rodríguez**  
+[GitHub](https://github.com/Sebasr22) | [LinkedIn](https://linkedin.com/in/tu-perfil)

@@ -7,14 +7,18 @@ import 'core/utils/injection.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  try {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
 
-  await initializeDependencies();
-  
-  runApp(const MediConnectApp());
+    await initializeDependencies();
+    
+    runApp(const MediConnectApp());
+  } catch (e) {
+    runApp(const MediConnectApp());
+  }
 }
 
 class MediConnectApp extends StatelessWidget {
@@ -32,8 +36,6 @@ class MediConnectApp extends StatelessWidget {
         ),
         useMaterial3: true,
         fontFamily: 'Roboto',
-        
-        // Tema de la barra de aplicación
         appBarTheme: AppBarTheme(
           elevation: 0,
           centerTitle: true,
@@ -45,8 +47,6 @@ class MediConnectApp extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-
-        // Tema de tarjetas
         cardTheme: CardThemeData(
           elevation: 4,
           shadowColor: Colors.grey.shade200,
@@ -54,8 +54,6 @@ class MediConnectApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
         ),
-
-        // Tema de botones elevados
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             elevation: 4,
@@ -65,8 +63,6 @@ class MediConnectApp extends StatelessWidget {
             ),
           ),
         ),
-
-        // Tema de campos de entrada
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.grey.shade50,

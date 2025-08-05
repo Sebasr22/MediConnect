@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../domain/entities/appointment_entity.dart';
@@ -30,7 +31,11 @@ class AppointmentModel extends Appointment {
     try {
       return DateTime.parse(dateString);
     } catch (e) {
-      // If date parsing fails, return current date
+      developer.log(
+        'Error parsing date: $dateString',
+        name: 'AppointmentModel._parseDate',
+        error: e,
+      );
       return DateTime.now();
     }
   }
@@ -57,13 +62,20 @@ class AppointmentModel extends Appointment {
         dateString: dateString,
       );
     } catch (e) {
+      developer.log(
+        'Error parsing AppointmentModel',
+        name: 'AppointmentModel.fromJson',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      
       // If parsing fails, create appointment with minimal valid data
       final id = json['id'] is String 
           ? int.tryParse(json['id']) ?? 0
           : (json['id'] as num?)?.toInt() ?? 0;
           
       return AppointmentModel(
-        id: id,
+        id: id > 0 ? id : 1,
         doctorIdField: 0,
         patientNameField: 'Datos incompletos',
         dateString: DateTime.now().toIso8601String().split('T')[0],

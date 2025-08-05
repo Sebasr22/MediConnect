@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../domain/entities/patient_entity.dart';
@@ -42,15 +43,22 @@ class PatientModel extends UserModel {
         password: password,
       );
     } catch (e) {
+      developer.log(
+        'Error parsing PatientModel',
+        name: 'PatientModel.fromJson',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      
       // Si falla el parsing, crear un paciente con datos mínimos válidos
       final id = json['id'] is String 
-          ? int.tryParse(json['id']) ?? 0
-          : (json['id'] as num?)?.toInt() ?? 0;
+          ? int.tryParse(json['id']) ?? 1
+          : (json['id'] as num?)?.toInt() ?? 1;
           
       return PatientModel(
-        id: id,
+        id: id > 0 ? id : 1,
         name: 'Datos incompletos',
-        email: 'Sin email',
+        email: 'datos-incompletos@ejemplo.com',
         phone: 'Sin teléfono',
         birthdateString: '2000-01-01',
       );
@@ -71,6 +79,12 @@ class PatientModel extends UserModel {
         birthdate: DateTime.parse(birthdateString),
       );
     } catch (e) {
+      developer.log(
+        'Error parsing birthdate: $birthdateString',
+        name: 'PatientModel.toEntity',
+        error: e,
+      );
+      
       // Si falla el parsing de fecha, usar fecha por defecto
       return Patient(
         id: id,

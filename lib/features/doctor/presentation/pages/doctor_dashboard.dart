@@ -12,6 +12,8 @@ import '../bloc/doctor_bloc.dart';
 import '../widgets/appointment_card.dart';
 import '../widgets/date_filter.dart';
 import 'create_appointment_page.dart';
+import '../../domain/usecases/get_doctor_appointments_usecase.dart';
+import '../../domain/usecases/create_appointment_usecase.dart';
 
 class DoctorDashboard extends StatefulWidget {
   const DoctorDashboard({super.key});
@@ -30,6 +32,47 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
   void initState() {
     super.initState();
     _loadUserData();
+  }
+
+  DoctorBloc _createDoctorBloc() {
+    try {
+      if (!getIt.isRegistered<DoctorBloc>()) {
+        _reinitializeDoctorDependencies();
+      }
+      
+      final doctorBloc = getIt<DoctorBloc>();
+      doctorBloc.add(GetAppointmentsRequested(_doctor!.id));
+      return doctorBloc;
+    } catch (e) {
+      _reinitializeDoctorDependencies();
+      final doctorBloc = getIt<DoctorBloc>();
+      doctorBloc.add(GetAppointmentsRequested(_doctor!.id));
+      return doctorBloc;
+    }
+  }
+
+  void _reinitializeDoctorDependencies() {
+    try {
+      // Re-registrar DoctorBloc y dependencias si no existen
+      if (!getIt.isRegistered<DoctorBloc>()) {
+        // DoctorBloc dependencies
+        if (!getIt.isRegistered<GetDoctorAppointmentsUseCase>()) {
+          getIt.registerLazySingleton(() => GetDoctorAppointmentsUseCase(getIt()));
+        }
+        if (!getIt.isRegistered<CreateAppointmentUseCase>()) {
+          getIt.registerLazySingleton(() => CreateAppointmentUseCase(getIt()));
+        }
+        
+        getIt.registerFactory(
+          () => DoctorBloc(
+            getDoctorAppointmentsUseCase: getIt(),
+            createAppointmentUseCase: getIt(),
+          ),
+        );
+      }
+    } catch (e) {
+      // Ignore dependency registration errors
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -192,8 +235,7 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
     }
 
     return BlocProvider(
-      create: (context) => getIt<DoctorBloc>()
-        ..add(GetAppointmentsRequested(_doctor!.id)),
+      create: (context) => _createDoctorBloc(),
       child: Scaffold(
         body: Container(
           decoration: BoxDecoration(

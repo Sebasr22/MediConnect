@@ -61,7 +61,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 400 || screenHeight < 600;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: BlocProvider(
         create: (context) => getIt<AuthBloc>(),
         child: BlocListener<AuthBloc, AuthState>(
@@ -103,18 +109,24 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             child: SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
-                child: Card(
-                  elevation: 20,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                physics: const ClampingScrollPhysics(),
+                padding: EdgeInsets.all(isSmallScreen ? 16.0 : 24.0),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: screenHeight - MediaQuery.of(context).padding.top - keyboardHeight - (isSmallScreen ? 32 : 48),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(32.0),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
+                  child: Card(
+                    elevation: 20,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
                           // Header
                           Row(
                             children: [
@@ -127,10 +139,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                   children: [
                                     Icon(
                                       Icons.person_add,
-                                      size: 60,
+                                      size: isSmallScreen ? 48 : 60,
                                       color: Colors.blue.shade800,
                                     ),
-                                    const SizedBox(height: 12),
+                                    SizedBox(height: isSmallScreen ? 8 : 12),
                                     Text(
                                       'Crear Cuenta',
                                       style: Theme.of(context)
@@ -139,6 +151,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                           ?.copyWith(
                                             fontWeight: FontWeight.bold,
                                             color: Colors.blue.shade800,
+                                            fontSize: isSmallScreen ? 20 : null,
                                           ),
                                     ),
                                     const SizedBox(height: 4),
@@ -149,6 +162,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                           .bodyMedium
                                           ?.copyWith(
                                             color: Colors.grey.shade600,
+                                            fontSize: isSmallScreen ? 13 : null,
                                           ),
                                     ),
                                   ],
@@ -159,7 +173,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               ), // Balance the back button
                             ],
                           ),
-                          const SizedBox(height: 32),
+                          SizedBox(height: isSmallScreen ? 20 : 32),
 
                           // User Type Selector
                           UserTypeSelector(
@@ -175,7 +189,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               });
                             },
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: isSmallScreen ? 16 : 24),
 
                           // Common Fields
                           CustomTextField(
@@ -185,7 +199,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             prefixIcon: Icons.person_outline,
                             validator: Validators.validateName,
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: isSmallScreen ? 12 : 16),
 
                           CustomTextField(
                             controller: _emailController,
@@ -195,7 +209,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             validator: Validators.validateEmail,
                             keyboardType: TextInputType.emailAddress,
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: isSmallScreen ? 12 : 16),
 
                           CustomTextField(
                             controller: _phoneController,
@@ -205,7 +219,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             validator: Validators.validatePhone,
                             keyboardType: TextInputType.phone,
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: isSmallScreen ? 12 : 16),
 
                           // Conditional Fields
                           if (_selectedUserType == UserType.patient)
@@ -213,7 +227,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           else
                             _buildDoctorFields(),
 
-                          const SizedBox(height: 16),
+                          SizedBox(height: isSmallScreen ? 12 : 16),
 
                           // Password Fields
                           CustomTextField(
@@ -224,7 +238,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             validator: Validators.validatePassword,
                             obscureText: true,
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: isSmallScreen ? 12 : 16),
 
                           CustomTextField(
                             controller: _confirmPasswordController,
@@ -239,7 +253,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             },
                             obscureText: true,
                           ),
-                          const SizedBox(height: 32),
+                          SizedBox(height: isSmallScreen ? 20 : 32),
 
                           // Register Button
                           BlocBuilder<AuthBloc, AuthState>(
@@ -261,8 +275,9 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ),
         ),
-      ),
-    );
+      ),  // Cierra BlocListener
+      ),  // Cierra BlocProvider
+    );    // Cierra Scaffold
   }
 
   Widget _buildPatientFields() {
@@ -301,45 +316,73 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: _specialtyController.text.isEmpty
-                  ? null
-                  : _specialtyController.text,
-              decoration: InputDecoration(
-                hintText: 'Selecciona tu especialidad',
-                hintStyle: TextStyle(color: Colors.grey.shade400),
-                prefixIcon: Icon(
-                  Icons.medical_services,
-                  color: Colors.grey.shade600,
-                ),
-                filled: true,
-                fillColor: Colors.grey.shade50,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
-                ),
-              ),
-              items: _specialties.map((specialty) {
-                return DropdownMenuItem(
-                  value: specialty,
-                  child: Text(specialty),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return DropdownButtonFormField<String>(
+                  value: _specialtyController.text.isEmpty
+                      ? null
+                      : _specialtyController.text,
+                  decoration: InputDecoration(
+                    hintText: 'Selecciona tu especialidad',
+                    hintStyle: TextStyle(color: Colors.grey.shade400),
+                    prefixIcon: Icon(
+                      Icons.medical_services,
+                      color: Colors.grey.shade600,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey.shade50,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
+                    ),
+                  ),
+                  isExpanded: true,
+                  items: _specialties.map((specialty) {
+                    return DropdownMenuItem(
+                      value: specialty,
+                      child: Flexible(
+                        child: Text(
+                          specialty,
+                          style: const TextStyle(fontSize: 16),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _specialtyController.text = value ?? '';
+                    });
+                  },
+                  validator: (value) =>
+                      value == null ? 'La especialidad es requerida' : null,
+                  selectedItemBuilder: (BuildContext context) {
+                    return _specialties.map<Widget>((String specialty) {
+                      return Container(
+                        alignment: Alignment.centerLeft,
+                        constraints: BoxConstraints(
+                          maxWidth: constraints.maxWidth - 80,
+                        ),
+                        child: Text(
+                          specialty,
+                          style: const TextStyle(fontSize: 16),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      );
+                    }).toList();
+                  },
                 );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _specialtyController.text = value ?? '';
-                });
               },
-              validator: (value) =>
-                  value == null ? 'La especialidad es requerida' : null,
             ),
           ],
         ),

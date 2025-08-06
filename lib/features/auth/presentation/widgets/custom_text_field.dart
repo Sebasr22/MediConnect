@@ -37,6 +37,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 400;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -45,26 +48,38 @@ class _CustomTextFieldState extends State<CustomTextField> {
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
             color: Colors.grey.shade700,
+            fontSize: isSmallScreen ? 13 : null,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: isSmallScreen ? 6 : 8),
         TextFormField(
           controller: widget.controller,
           validator: widget.validator,
           keyboardType: widget.keyboardType,
           obscureText: _isObscured,
           maxLines: widget.obscureText ? 1 : widget.maxLines,
+          style: TextStyle(
+            fontSize: isSmallScreen ? 14 : 16,
+          ),
           decoration: InputDecoration(
             hintText: widget.hintText,
-            hintStyle: TextStyle(color: Colors.grey.shade400),
+            hintStyle: TextStyle(
+              color: Colors.grey.shade400,
+              fontSize: isSmallScreen ? 13 : null,
+            ),
             prefixIcon: widget.prefixIcon != null
-                ? Icon(widget.prefixIcon, color: Colors.grey.shade600)
+                ? Icon(
+                    widget.prefixIcon, 
+                    color: Colors.grey.shade600,
+                    size: isSmallScreen ? 20 : 24,
+                  )
                 : null,
             suffixIcon: widget.obscureText
                 ? IconButton(
                     icon: Icon(
                       _isObscured ? Icons.visibility : Icons.visibility_off,
                       color: Colors.grey.shade600,
+                      size: isSmallScreen ? 20 : 24,
                     ),
                     onPressed: () {
                       setState(() {
@@ -95,10 +110,11 @@ class _CustomTextFieldState extends State<CustomTextField> {
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.red.shade400, width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: isSmallScreen ? 12 : 16,
+              vertical: isSmallScreen ? 12 : 16,
             ),
+            isDense: isSmallScreen,
           ),
         ),
       ],

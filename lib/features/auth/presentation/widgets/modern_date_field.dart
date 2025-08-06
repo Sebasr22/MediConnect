@@ -200,13 +200,6 @@ class _ModernDateFieldState extends State<ModernDateField>
                             ),
                           ),
                         ),
-                        Icon(
-                          Icons.calendar_today,
-                          color: _isFocused 
-                              ? widget.focusColor ?? Colors.blue.shade600
-                              : Colors.grey.shade500,
-                          size: 20,
-                        ),
                       ],
                     ),
                   ),

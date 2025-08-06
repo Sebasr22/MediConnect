@@ -32,162 +32,183 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final isSmallScreen = screenHeight < 600 || screenWidth < 400;
+    
     return Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.teal.shade800,
-                Colors.teal.shade600,
-                Colors.white,
-              ],
-              stops: const [0.0, 0.3, 0.6],
-            ),
+      resizeToAvoidBottomInset: true,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.teal.shade800,
+              Colors.teal.shade600,
+              Colors.white,
+            ],
+            stops: const [0.0, 0.3, 0.6],
           ),
-          child: SafeArea(
-            child: BlocListener<DoctorBloc, DoctorState>(
-              listener: (context, state) {
-                if (state is DoctorError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                } else if (state is AppointmentCreated) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('¡Cita creada exitosamente!'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                  Navigator.pop(context);
-                }
-              },
-              child: Column(
-                children: [
-                  // Header
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const Expanded(
-                          child: Text(
-                            'Nueva Cita',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+        ),
+        child: SafeArea(
+          child: BlocListener<DoctorBloc, DoctorState>(
+            listener: (context, state) {
+              if (state is DoctorError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              } else if (state is AppointmentCreated) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('¡Cita creada exitosamente!'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                Navigator.pop(context);
+              }
+            },
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: screenHeight - MediaQuery.of(context).padding.top - keyboardHeight,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                      // Header
+                      Padding(
+                        padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              onPressed: () => Navigator.pop(context),
+                              icon: const Icon(
+                                Icons.arrow_back,
+                                color: Colors.white,
+                              ),
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        const SizedBox(width: 48),
-                      ],
-                    ),
-                  ),
-
-                  // Icon
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.event_note,
-                      size: 50,
-                      color: Colors.teal.shade800,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Form Card
-                  Expanded(
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 24),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Información de la Cita',
-                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            const Expanded(
+                              child: Text(
+                                'Nueva Cita',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.teal.shade800,
                                 ),
+                                textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 24),
+                            ),
+                            const SizedBox(width: 48),
+                          ],
+                        ),
+                      ),
 
-                              // Patient Name
-                              CustomTextField(
-                                controller: _patientNameController,
-                                label: 'Nombre del Paciente',
-                                hintText: 'Ana García',
-                                prefixIcon: Icons.person_outline,
-                                validator: (value) => Validators.validateRequired(value, 'Nombre del paciente'),
-                              ),
-                              const SizedBox(height: 20),
-
-                              // Date Selection
-                              _buildDateSelector(),
-                              const SizedBox(height: 20),
-
-                              // Time Selection
-                              _buildTimeSelector(),
-
-                              const Spacer(),
-
-                              // Create Button
-                              BlocBuilder<DoctorBloc, DoctorState>(
-                                builder: (context, state) {
-                                  return CustomButton(
-                                    text: 'Crear Cita',
-                                    isLoading: state is CreatingAppointment,
-                                    backgroundColor: Colors.teal.shade600,
-                                    onPressed: _submitForm,
-                                  );
-                                },
+                      // Icon - Ocultar en pantallas pequeñas cuando hay teclado
+                      if (keyboardHeight == 0 || !isSmallScreen) ...[
+                        Container(
+                          width: isSmallScreen ? 80 : 100,
+                          height: isSmallScreen ? 80 : 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
                               ),
                             ],
                           ),
+                          child: Icon(
+                            Icons.event_note,
+                            size: isSmallScreen ? 40 : 50,
+                            color: Colors.teal.shade800,
+                          ),
+                        ),
+                        SizedBox(height: isSmallScreen ? 16 : 32),
+                      ],
+
+                      // Form Card
+                      Flexible(
+                        child: Container(
+                          margin: EdgeInsets.symmetric(
+                            horizontal: isSmallScreen ? 16 : 24,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Información de la Cita',
+                                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.teal.shade800,
+                                      fontSize: isSmallScreen ? 18 : null,
+                                    ),
+                                  ),
+                                  SizedBox(height: isSmallScreen ? 16 : 24),
+
+                                  // Patient Name
+                                  CustomTextField(
+                                    controller: _patientNameController,
+                                    label: 'Nombre del Paciente',
+                                    hintText: 'Ana García',
+                                    prefixIcon: Icons.person_outline,
+                                    validator: (value) => Validators.validateRequired(value, 'Nombre del paciente'),
+                                  ),
+                                  SizedBox(height: isSmallScreen ? 16 : 20),
+
+                                  // Date Selection
+                                  _buildDateSelector(),
+                                  SizedBox(height: isSmallScreen ? 16 : 20),
+
+                                  // Time Selection
+                                  _buildTimeSelector(),
+
+                                  SizedBox(height: isSmallScreen ? 24 : 32),
+
+                                  // Create Button
+                                  BlocBuilder<DoctorBloc, DoctorState>(
+                                    builder: (context, state) {
+                                      return CustomButton(
+                                        text: 'Crear Cita',
+                                        isLoading: state is CreatingAppointment,
+                                        backgroundColor: Colors.teal.shade600,
+                                        onPressed: _submitForm,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      SizedBox(height: isSmallScreen ? 16 : 24),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                ],
+                ),
               ),
             ),
           ),

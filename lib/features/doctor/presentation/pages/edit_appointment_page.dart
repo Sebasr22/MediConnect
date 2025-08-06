@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/validators.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../../auth/domain/entities/appointment_entity.dart';
 import '../../../auth/presentation/widgets/custom_text_field.dart';
 import '../../../auth/presentation/widgets/custom_button.dart';
@@ -67,20 +68,9 @@ class _EditAppointmentPageState extends State<EditAppointmentPage> {
             child: BlocListener<DoctorBloc, DoctorState>(
               listener: (context, state) {
                 if (state is DoctorError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
+                  NotificationService.showError(context, state.message);
                 } else if (state is AppointmentUpdated) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Simulación: Cita editada exitosamente\n(Los cambios no se guardan permanentemente)'),
-                      backgroundColor: Colors.orange,
-                      duration: Duration(seconds: 4),
-                    ),
-                  );
+                  NotificationService.showSuccess(context, 'Simulación: Cita editada exitosamente\n(Los cambios no se guardan permanentemente)');
                   Navigator.pop(context);
                 }
               },
@@ -364,22 +354,12 @@ class _EditAppointmentPageState extends State<EditAppointmentPage> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       if (_selectedDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Por favor selecciona una fecha'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        NotificationService.showError(context, 'Por favor selecciona una fecha');
         return;
       }
 
       if (_selectedTime == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Por favor selecciona una hora'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        NotificationService.showError(context, 'Por favor selecciona una hora');
         return;
       }
 

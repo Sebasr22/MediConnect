@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/validators.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../../auth/presentation/widgets/custom_text_field.dart';
 import '../../../auth/presentation/widgets/custom_button.dart';
 import '../bloc/doctor_bloc.dart';
@@ -56,19 +57,9 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
           child: BlocListener<DoctorBloc, DoctorState>(
             listener: (context, state) {
               if (state is DoctorError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.red,
-                  ),
-                );
+                NotificationService.showError(context, state.message);
               } else if (state is AppointmentCreated) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('¡Cita creada exitosamente!'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
+                NotificationService.showSuccess(context, '¡Cita creada exitosamente!');
                 Navigator.pop(context);
               }
             },
@@ -367,22 +358,12 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       if (_selectedDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Por favor selecciona una fecha'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        NotificationService.showError(context, 'Por favor selecciona una fecha');
         return;
       }
 
       if (_selectedTime == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Por favor selecciona una hora'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        NotificationService.showError(context, 'Por favor selecciona una hora');
         return;
       }
 

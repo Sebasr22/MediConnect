@@ -147,4 +147,4 @@ Durante el desarrollo tomé decisiones arquitectónicas específicas:
 ## Contacto
 
 **Sebastián Rodríguez**  
-[GitHub](https://github.com/Sebasr22) | [LinkedIn](https://linkedin.com/in/tu-perfil)
+[GitHub](https://github.com/Sebasr22) | [LinkedIn](https://www.linkedin.com/in/sebastian-rodriguez-9340a2191/)

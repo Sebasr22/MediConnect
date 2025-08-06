@@ -121,7 +121,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         );
       }
     } on DioException catch (e) {
-
       if (e.response?.statusCode == 400) {
         throw const ValidationException('Email ya registrado');
       }
@@ -169,7 +168,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         );
       }
     } on DioException catch (e) {
-
       if (e.response?.statusCode == 400) {
         throw const ValidationException('Email ya registrado');
       }

@@ -25,7 +25,7 @@ class PatientRepositoryImpl implements PatientRepository {
     } on ConnectionException catch (e) {
       return Left(ConnectionFailure(e.message));
     } catch (e) {
-      return const Left(ServerFailure('Error al obtener doctores'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 
@@ -43,7 +43,7 @@ class PatientRepositoryImpl implements PatientRepository {
     } on ConnectionException catch (e) {
       return Left(ConnectionFailure(e.message));
     } catch (e) {
-      return const Left(ServerFailure('Error al obtener doctor'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 }

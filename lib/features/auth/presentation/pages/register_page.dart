@@ -5,6 +5,7 @@ import '../../../../core/navigation/app_router.dart';
 
 import '../../../../core/utils/injection.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../core/services/notification_service.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
@@ -73,19 +74,9 @@ class _RegisterPageState extends State<RegisterPage> {
         child: BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              NotificationService.showError(context, state.message);
             } else if (state is AuthAuthenticated) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('¡Registro exitoso!'),
-                  backgroundColor: Colors.green,
-                ),
-              );
+              NotificationService.showSuccess(context, '¡Registro exitoso!');
               // Navigate to appropriate dashboard
               if (state.isDoctor) {
                 context.go(AppRouter.doctorDashboard);
@@ -416,12 +407,7 @@ class _RegisterPageState extends State<RegisterPage> {
     if (_formKey.currentState!.validate()) {
       if (_selectedUserType == UserType.patient) {
         if (_selectedBirthdate == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Por favor selecciona tu fecha de nacimiento'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          NotificationService.showError(context, 'Por favor selecciona tu fecha de nacimiento');
           return;
         }
 

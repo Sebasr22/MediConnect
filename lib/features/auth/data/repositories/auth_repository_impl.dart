@@ -66,7 +66,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ConnectionException catch (e) {
       return Left(ConnectionFailure(e.message));
     } catch (e) {
-      return const Left(ServerFailure('Error inesperado'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 
@@ -109,7 +109,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ConnectionException catch (e) {
       return Left(ConnectionFailure(e.message));
     } catch (e) {
-      return const Left(ServerFailure('Error inesperado'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 
@@ -150,7 +150,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ConnectionException catch (e) {
       return Left(ConnectionFailure(e.message));
     } catch (e) {
-      return const Left(ServerFailure('Error inesperado'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 

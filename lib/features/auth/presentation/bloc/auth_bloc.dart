@@ -133,14 +133,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   /// Convierte los errores del dominio en mensajes legibles para el usuario
   String _mapFailureToMessage(Failure failure) {
-    switch (failure.runtimeType) {
-      case InvalidCredentialsFailure _:
+    switch (failure) {
+      case InvalidCredentialsFailure():
         return 'Credenciales inválidas. Verifica tu email y contraseña.';
-      case ValidationFailure _:
+      case ValidationFailure():
         return failure.message ?? 'Datos inválidos. Verifica la información ingresada.';
-      case ServerFailure _:
-        return failure.message ?? 'Error del servidor. Intenta más tarde.';
-      case ConnectionFailure _:
+      case ServerFailure():
+        // Priorizar el mensaje específico del servidor si existe
+        if (failure.message != null && failure.message!.isNotEmpty) {
+          return failure.message!;
+        }
+        return 'Error del servidor. Intenta más tarde.';
+      case ConnectionFailure():
         return 'Sin conexión a internet. Verifica tu conexión.';
       default:
         return 'Ha ocurrido un error inesperado.';

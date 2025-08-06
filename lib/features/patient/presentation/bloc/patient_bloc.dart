@@ -222,11 +222,19 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
   }
 
   String _mapFailureToMessage(Failure failure) {
-    switch (failure.runtimeType) {
-      case ServerFailure _:
-        return failure.message ?? 'Error del servidor. Intenta más tarde.';
-      case ConnectionFailure _:
-        return failure.message ?? 'Sin conexión a internet. Verifica tu conexión.';
+    switch (failure) {
+      case ServerFailure():
+        // Priorizar el mensaje específico del servidor si existe
+        if (failure.message != null && failure.message!.isNotEmpty) {
+          return failure.message!;
+        }
+        return 'Error del servidor. Intenta más tarde.';
+      case ConnectionFailure():
+        // Priorizar el mensaje específico si existe
+        if (failure.message != null && failure.message!.isNotEmpty) {
+          return failure.message!;
+        }
+        return 'Sin conexión a internet. Verifica tu conexión.';
       default:
         // Incluir información específica del error
         final errorInfo = failure.message ?? failure.toString();

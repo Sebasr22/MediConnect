@@ -25,7 +25,7 @@ class DoctorRepositoryImpl implements DoctorRepository {
     } on ConnectionException catch (e) {
       return Left(ConnectionFailure(e.message));
     } catch (e) {
-      return const Left(ServerFailure('Error al obtener citas'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 
@@ -51,7 +51,7 @@ class DoctorRepositoryImpl implements DoctorRepository {
     } on ConnectionException catch (e) {
       return Left(ConnectionFailure(e.message));
     } catch (e) {
-      return const Left(ServerFailure('Error al crear cita'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 
@@ -80,7 +80,7 @@ class DoctorRepositoryImpl implements DoctorRepository {
     } on ConnectionException catch (e) {
       return Left(ConnectionFailure(e.message));
     } catch (e) {
-      return const Left(ServerFailure('Error al filtrar citas'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 }

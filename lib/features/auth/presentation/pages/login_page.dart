@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/navigation/app_router.dart';
 import '../../../../core/utils/injection.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../core/services/notification_service.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/modern_text_field.dart';
 import '../widgets/custom_button.dart';
@@ -38,16 +39,7 @@ class _LoginPageState extends State<LoginPage> {
         child: BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red.shade600,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              );
+              NotificationService.showError(context, state.message);
             } else if (state is AuthAuthenticated) {
               // Navigate based on user type
               if (state.isDoctor) {
